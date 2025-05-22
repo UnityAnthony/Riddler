@@ -5,6 +5,7 @@ using Unity.InferenceEngine;
 using System.Collections;
 using UnityEngine.Networking;
 using Unity.Profiling;
+using System.Net;
 
 public class TextToSpeech : Singleton<TextToSpeech>
 {
@@ -92,13 +93,38 @@ public class TextToSpeech : Singleton<TextToSpeech>
         
     }
 
-    void ReadDictionary()
+    async void ReadDictionary()
     {
         dict.Clear();
         if (!hasPhenomeDictionary) return;
 
-        StartCoroutine(LoadPhoneme("phoneme_dict.txt", (lines) => AddPhoneme(lines)));
+       // StartCoroutine(LoadPhoneme("phoneme_dict.txt", (lines) => AddPhoneme(lines)));
 
+        await LoadPhonemeAsync("phoneme_dict.txt", (lines) => AddPhoneme(lines));
+
+    }
+    public async Awaitable LoadPhonemeAsync(string fileName, System.Action<string[]> onComplete)
+    {
+        Debug.Log("LoadPhonemeAsync");
+        string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, fileName);
+
+
+        // On Android, we must use UnityWebRequest to access StreamingAssets
+        UnityWebRequest www = UnityWebRequest.Get(filePath);
+        var asyncOp = www.SendWebRequest();
+        while (!asyncOp.isDone)
+        {
+            await Awaitable.NextFrameAsync();
+        }
+
+        string textContent = www.downloadHandler.text;
+
+
+        // Split the text content into lines
+        string[] lines = textContent.Split(new[] { '\r', '\n' },
+            System.StringSplitOptions.RemoveEmptyEntries);
+
+        onComplete?.Invoke(lines);
     }
     public IEnumerator LoadPhoneme(string fileName, System.Action<string[]> onComplete)
     {
@@ -251,7 +277,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
         var s = output.ReadbackAndClone();
         var samples = s.DownloadToArray();
 
-        Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
+       // Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
 
         clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
         clip.SetData(samples, 0);
@@ -295,7 +321,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
         var s = output.ReadbackAndClone();
         var samples = s.DownloadToArray();
 
-        Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
+      //  Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
 
         clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
         clip.SetData(samples, 0);

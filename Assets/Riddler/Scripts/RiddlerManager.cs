@@ -47,10 +47,6 @@ public class RiddlerManager : Singleton<RiddlerManager>
     }
     public void AnswerRiddle()
     {
-       // Debug.Log("AnswerRiddle");
-        //Riddle r = riddles[currentRiddle];
-        //string a = r.Answer;
-        // RiddlerUIManager.Instance.SetAnswer(a);// reveal if correct
        SpeechToText.Instance.SetAudioClip(recordedClip);
     }
 
