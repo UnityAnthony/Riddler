@@ -277,8 +277,9 @@ public class TextToSpeech : Singleton<TextToSpeech>
         var s = output.ReadbackAndClone();
         var samples = s.DownloadToArray();
 
-       // Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
-
+        // Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
+        if (clip)
+            Destroy(clip);
         clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
         clip.SetData(samples, 0);
 
@@ -321,8 +322,9 @@ public class TextToSpeech : Singleton<TextToSpeech>
         var s = output.ReadbackAndClone();
         var samples = s.DownloadToArray();
 
-      //  Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
-
+        //  Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
+        if (clip)
+            Destroy(clip);
         clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
         clip.SetData(samples, 0);
 
@@ -350,7 +352,8 @@ public class TextToSpeech : Singleton<TextToSpeech>
         var samples = s.DownloadToArray();
 
         Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
-
+        if (clip)
+            Destroy(clip);
         clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
         clip.SetData(samples, 0);
 

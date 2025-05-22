@@ -11,6 +11,7 @@ public class RiddlerManager : Singleton<RiddlerManager>
 
     //RecordClip
     public AudioClip recordedClip;
+    public AudioClip trimmedClip;
     private bool isRecording = false;
     public string deviceName;
     private int frequency = 16000;  // Standard sample rate
@@ -101,6 +102,10 @@ public class RiddlerManager : Singleton<RiddlerManager>
         if (!isRecording && deviceName != null)
         {
             Debug.Log("Starting Recording...");
+            if (recordedClip)
+            {
+                Destroy(recordedClip);
+            }
             recordedClip = Microphone.Start(deviceName, false, recordingLength, frequency);
             isRecording = true;
         }
@@ -122,8 +127,9 @@ public class RiddlerManager : Singleton<RiddlerManager>
             {
                 float[] samples = new float[position * recordedClip.channels];
                 recordedClip.GetData(samples, 0);
-
-                AudioClip trimmedClip = AudioClip.Create(
+                if(trimmedClip)
+                    AudioClip.Destroy(trimmedClip);
+                trimmedClip = AudioClip.Create(
                     "Recorded",
                     position,
                     recordedClip.channels,
@@ -141,6 +147,8 @@ public class RiddlerManager : Singleton<RiddlerManager>
             Debug.Log("was not recording");
         }
     }
+
+
 
     public void PlayRecording()
     {
