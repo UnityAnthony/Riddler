@@ -70,7 +70,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
     {
         inputText = s;
     }
-    public void Run()
+    public async Awaitable Run()
     {
         TextToSpeechRunMarker.Begin();
         string ptext;
@@ -87,8 +87,8 @@ public class TextToSpeech : Singleton<TextToSpeech>
             //ptext = "D UW1 P L AH0 K EY2 T";
         }
         TextToSpeechRunMarker.End();
-        StartCoroutine(ExecuteDoInferenceTimeSlicing(ptext));
-        // DoInference(ptext);
+       // StartCoroutine(ExecuteDoInferenceTimeSlicing(ptext));
+        await DoInferenceASync(ptext);
         
     }
 
@@ -261,45 +261,49 @@ public class TextToSpeech : Singleton<TextToSpeech>
 
         m_IsExecuting = false;
     }
-  //  ///
-  //  public  void DoInferenceAsync(string ptext)
-  //  {
-  //      if (m_IsExecuting)
-  //          yield break;
 
-  //      m_IsExecuting = true;
+    public async Awaitable DoInferenceASync(string ptext)
+    {
 
-  //      if (input != null)
-  //      {
-  //          input.Dispose();
-  //          input = null;
-  //      }
+        if (input != null)
+        {
+            input.Dispose();
+            input = null;
+        }
 
-  //      int[] tokens = GetTokens(ptext);
+        int[] tokens = GetTokens(ptext);
 
-  //      input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
-  //      engine.Schedule(input);
+        input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
+
+        var m_Schedule = engine.ScheduleIterable(input);
 
 
+        float lastYieldTime = Time.realtimeSinceStartup;
 
-  ////      await
 
+        while (m_Schedule.MoveNext())
+        {
+            float currentTime = Time.realtimeSinceStartup;
+            if (currentTime - lastYieldTime > timeThreshold)
+            {
+                await Awaitable.EndOfFrameAsync();
+                lastYieldTime = currentTime;
+            }
+        }
 
-  //      var output = engine.PeekOutput("wav") as Tensor<float>;
-  //      var s = output.ReadbackAndClone();
-  //      var samples = s.DownloadToArray();
+        var output = engine.PeekOutput("wav") as Tensor<float>;
+        var s = output.ReadbackAndClone();
+        var samples = s.DownloadToArray();
 
-  //      Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
+        Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
 
-  //      clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
-  //      clip.SetData(samples, 0);
+        clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
+        clip.SetData(samples, 0);
 
-  //      clipLength = clip.length;
-  //      Speak();
+        clipLength = clip.length;
+        Speak();
 
-  //      m_IsExecuting = false;
-  //  }
-
+    }
 
     public void DoInference(string ptext)
     {

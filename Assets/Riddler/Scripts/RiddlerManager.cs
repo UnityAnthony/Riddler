@@ -28,7 +28,7 @@ public class RiddlerManager : Singleton<RiddlerManager>
 
     }
 
-    public void RequestRiddle()
+    public async void RequestRiddle()
     {
        
         // Debug.Log("RequestRiddle");
@@ -42,7 +42,7 @@ public class RiddlerManager : Singleton<RiddlerManager>
         if (Application.isEditor && !Application.isPlaying)
             TextToSpeech.Instance.SetupInferenceEngine();
 
-        TextToSpeech.Instance.Run();
+        await TextToSpeech.Instance.Run();
 
     }
     public void AnswerRiddle()
@@ -263,7 +263,7 @@ public class RiddlerManager : Singleton<RiddlerManager>
         }
 
     }
-    public void CheckAnswer(string s)
+    public async void CheckAnswer(string s)
     {
         Debug.Log("CheckAnswer " + s);
 
@@ -280,6 +280,6 @@ public class RiddlerManager : Singleton<RiddlerManager>
         RiddlerUIManager.Instance.SetAnswer(result);
 
         TextToSpeech.Instance.SetText(result);
-        TextToSpeech.Instance.Run();
+        await TextToSpeech.Instance.Run();
     }
 }
