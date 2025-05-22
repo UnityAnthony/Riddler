@@ -1,0 +1,18 @@
+{
+    "asset": "2e3fc8e4f26f75d4e89b9f7c6d86dcde",
+    "fileName": "0196d996-3dae-73da-a116-ed08b8303ee9.png",
+    "prompt": "wood grain",
+    "negativePrompt": "",
+    "model": "b91fcf71-f4cf-43cb-ba1e-1f22a1296e46",
+    "customSeed": -1,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

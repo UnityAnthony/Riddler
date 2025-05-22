@@ -1,0 +1,18 @@
+{
+    "asset": "c013aa830a5d7c3428d34e31c9df5190",
+    "fileName": "0196d993-74f6-7811-a6a7-44245eeae7b0.jpg",
+    "prompt": "Create a walk cycle of an man in a white buisness suit with a transparent background as a sprite sheet",
+    "negativePrompt": "",
+    "model": "7f7b9460-c961-4bf8-a854-e164210cd1ff",
+    "customSeed": 1,
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}
