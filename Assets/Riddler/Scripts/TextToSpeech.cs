@@ -4,9 +4,12 @@ using UnityEngine;
 using Unity.InferenceEngine;
 using System.Collections;
 using UnityEngine.Networking;
+using Unity.Profiling;
 
 public class TextToSpeech : Singleton<TextToSpeech>
 {
+    static readonly ProfilerMarker TextToSpeechRunMarker = new ProfilerMarker("TextToSpeech::Run");
+    static readonly ProfilerMarker TextToSpeechInferenceStepMarker = new ProfilerMarker("TextToSpeech::InferenceStep");
     public string inputText = "Once upon a time, there lived a girl called Alice. She lived in a house in the woods.";
     //string inputText = "The quick brown fox jumped over the lazy dog";
     //string inputText = "There are many uses of the things she uses!";
@@ -68,7 +71,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
     }
     public void Run()
     {
-
+        TextToSpeechRunMarker.Begin();
         string ptext;
         if (hasPhenomeDictionary)
         {
@@ -83,6 +86,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
             //ptext = "D UW1 P L AH0 K EY2 T";
         }
         DoInference(ptext);
+        TextToSpeechRunMarker.End();
     }
 
     void ReadDictionary()
@@ -212,6 +216,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
 
     public void DoInference(string ptext)
     {
+        TextToSpeechInferenceStepMarker.Begin();
         if (input != null)
         {
             input.Dispose();
@@ -234,6 +239,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
 
         clipLength = clip.length;
         Speak();
+        TextToSpeechInferenceStepMarker.End();
     }
     private void Speak()
     {

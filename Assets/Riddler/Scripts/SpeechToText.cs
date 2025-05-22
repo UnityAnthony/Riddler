@@ -3,10 +3,13 @@ using UnityEngine;
 using Unity.InferenceEngine;
 using System.Text;
 using Unity.Collections;
-
+using Unity.Profiling;
 
 public class SpeechToText :  Singleton<SpeechToText>
 {
+
+    static readonly ProfilerMarker SpeechToTextRunMarker = new ProfilerMarker("SpeechToText::Run"); 
+    static readonly ProfilerMarker SpeechToTextInferenceStepMarker = new ProfilerMarker("SpeechToText::InferenceStep");
     Worker decoder1, decoder2, encoder, spectrogram;
     Worker argmax;
 
@@ -50,6 +53,7 @@ public class SpeechToText :  Singleton<SpeechToText>
    // public async void Start()
     public void Start()
     {
+
         Setup();
         ReloadAudio();
 
@@ -64,6 +68,7 @@ public class SpeechToText :  Singleton<SpeechToText>
 
     public async void Run()
     {
+        SpeechToTextRunMarker.Begin();
         transcribe = true;
         //outputString = "";
         if (tokensTensor != null)
@@ -87,6 +92,8 @@ public class SpeechToText :  Singleton<SpeechToText>
         lastToken = new NativeArray<int>(1, Allocator.Persistent); lastToken[0] = NO_TIME_STAMPS;
         lastTokenTensor = new Tensor<int>(new TensorShape(1, 1), new[] { NO_TIME_STAMPS });
 
+        SpeechToTextRunMarker.End();
+
         while (true)
         {
             if (!transcribe || tokenCount >= (outputTokens.Length - 1))
@@ -94,6 +101,7 @@ public class SpeechToText :  Singleton<SpeechToText>
             m_Awaitable = InferenceStep();
             await m_Awaitable;
         }
+    
 
     }
 
@@ -192,6 +200,7 @@ public class SpeechToText :  Singleton<SpeechToText>
     }
     async Awaitable InferenceStep()
     {
+        SpeechToTextInferenceStepMarker.Begin();
         decoder1.SetInput("input_ids", tokensTensor);
         decoder1.SetInput("encoder_hidden_states", encodedAudio);
         decoder1.Schedule();
@@ -261,6 +270,7 @@ public class SpeechToText :  Singleton<SpeechToText>
         {
             RiddlerManager.Instance.CheckAnswer(outputString);        
         }
+        SpeechToTextInferenceStepMarker.End();
     }
 
     // Tokenizer
