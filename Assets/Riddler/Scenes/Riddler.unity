@@ -523,6 +523,7 @@ MonoBehaviour:
   audioSource: {fileID: 947725631}
   clipLength: 2.078
   modelAsset: {fileID: 5022602860645237092, guid: 5d45998530b9c19448a5d3d38ff8ce91, type: 3}
+  timeThreshold: 0.1
 --- !u!114 &1462727457
 MonoBehaviour:
   m_ObjectHideFlags: 0

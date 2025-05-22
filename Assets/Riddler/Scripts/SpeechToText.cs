@@ -4,6 +4,8 @@ using Unity.InferenceEngine;
 using System.Text;
 using Unity.Collections;
 using Unity.Profiling;
+using System;
+using System.Threading.Tasks;
 
 public class SpeechToText :  Singleton<SpeechToText>
 {
@@ -66,7 +68,7 @@ public class SpeechToText :  Singleton<SpeechToText>
     Tensor<int> tokensTensor;
     Tensor<float> audioInput;
 
-    public async void Run()
+    public async Awaitable Run()
     {
         SpeechToTextRunMarker.Begin();
         transcribe = true;
@@ -98,7 +100,7 @@ public class SpeechToText :  Singleton<SpeechToText>
         {
             if (!transcribe || tokenCount >= (outputTokens.Length - 1))
                 return;
-            m_Awaitable = InferenceStep();
+            m_Awaitable = InferenceStep((outputString)=>RiddlerManager.Instance.CheckAnswer(outputString));
             await m_Awaitable;
         }
     
@@ -164,13 +166,13 @@ public class SpeechToText :  Singleton<SpeechToText>
         tokenCount = 3;
 
     }
-    public void SetAudioClip(AudioClip clip)
+    public async void SetAudioClip(AudioClip clip)
     {
         audioClip = clip;
         outputString = "";
         SetupDecoders();
         ReloadAudio();
-        Run();
+        await Run();
     }
     private void ReloadAudio()
     {
@@ -198,9 +200,9 @@ public class SpeechToText :  Singleton<SpeechToText>
         encoder.Schedule(logmel);
         encodedAudio = encoder.PeekOutput() as Tensor<float>;
     }
-    async Awaitable InferenceStep()
+    async Awaitable InferenceStep(Action<string> callback)
     {
-        SpeechToTextInferenceStepMarker.Begin();
+       
         decoder1.SetInput("input_ids", tokensTensor);
         decoder1.SetInput("encoder_hidden_states", encodedAudio);
         decoder1.Schedule();
@@ -268,9 +270,9 @@ public class SpeechToText :  Singleton<SpeechToText>
 
         if (transcribe == false)
         {
-            RiddlerManager.Instance.CheckAnswer(outputString);        
+            callback?.Invoke(outputString);       
         }
-        SpeechToTextInferenceStepMarker.End();
+      
     }
 
     // Tokenizer

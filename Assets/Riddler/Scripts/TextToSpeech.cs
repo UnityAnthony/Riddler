@@ -9,7 +9,7 @@ using Unity.Profiling;
 public class TextToSpeech : Singleton<TextToSpeech>
 {
     static readonly ProfilerMarker TextToSpeechRunMarker = new ProfilerMarker("TextToSpeech::Run");
-    static readonly ProfilerMarker TextToSpeechInferenceStepMarker = new ProfilerMarker("TextToSpeech::InferenceStep");
+   // static readonly ProfilerMarker TextToSpeechInferenceStepMarker = new ProfilerMarker("TextToSpeech::InferenceStep");
     public string inputText = "Once upon a time, there lived a girl called Alice. She lived in a house in the woods.";
     //string inputText = "The quick brown fox jumped over the lazy dog";
     //string inputText = "There are many uses of the things she uses!";
@@ -41,7 +41,8 @@ public class TextToSpeech : Singleton<TextToSpeech>
     Model model;
     AudioClip clip;
     Tensor input;
-
+    private bool m_IsExecuting;
+    public float timeThreshold = 0.016f; // 16ms
     void Start()
     {
         SetupInferenceEngine();
@@ -85,8 +86,10 @@ public class TextToSpeech : Singleton<TextToSpeech>
             //ptext = "W AH1 N S AH0 P AA1 N AH0 T AY1 M , AH0 F R AA1 G M EH1 T AH0 P R IH1 N S EH0 S . DH AH0 F R AA1 G K IH1 S T DH AH0 P R IH1 N S EH0 S AH0 N D B IH0 K EY1 M AH0 P R IH1 N S .";
             //ptext = "D UW1 P L AH0 K EY2 T";
         }
-        DoInference(ptext);
         TextToSpeechRunMarker.End();
+        StartCoroutine(ExecuteDoInferenceTimeSlicing(ptext));
+        // DoInference(ptext);
+        
     }
 
     void ReadDictionary()
@@ -213,10 +216,94 @@ public class TextToSpeech : Singleton<TextToSpeech>
         }
         return tokens;
     }
+    public IEnumerator ExecuteDoInferenceTimeSlicing(string ptext)
+    {
+        if (m_IsExecuting)
+            yield break;
+
+        m_IsExecuting = true;
+
+        if (input != null)
+        {
+            input.Dispose();
+            input = null;
+        }
+
+        int[] tokens = GetTokens(ptext);
+
+        input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
+        var m_Schedule = engine.ScheduleIterable(input);
+
+
+        float lastYieldTime = Time.realtimeSinceStartup;
+
+        while (m_Schedule.MoveNext())
+        {
+            float currentTime = Time.realtimeSinceStartup;
+            if (currentTime - lastYieldTime > timeThreshold)
+            {
+                yield return new WaitForEndOfFrame();
+                lastYieldTime = currentTime;
+            }
+        }
+
+        var output = engine.PeekOutput("wav") as Tensor<float>;
+        var s = output.ReadbackAndClone();
+        var samples = s.DownloadToArray();
+
+        Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
+
+        clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
+        clip.SetData(samples, 0);
+
+        clipLength = clip.length;
+        Speak();
+
+        m_IsExecuting = false;
+    }
+  //  ///
+  //  public  void DoInferenceAsync(string ptext)
+  //  {
+  //      if (m_IsExecuting)
+  //          yield break;
+
+  //      m_IsExecuting = true;
+
+  //      if (input != null)
+  //      {
+  //          input.Dispose();
+  //          input = null;
+  //      }
+
+  //      int[] tokens = GetTokens(ptext);
+
+  //      input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
+  //      engine.Schedule(input);
+
+
+
+  ////      await
+
+
+  //      var output = engine.PeekOutput("wav") as Tensor<float>;
+  //      var s = output.ReadbackAndClone();
+  //      var samples = s.DownloadToArray();
+
+  //      Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
+
+  //      clip = AudioClip.Create("voice audio", samples.Length, 1, samplerate, false);
+  //      clip.SetData(samples, 0);
+
+  //      clipLength = clip.length;
+  //      Speak();
+
+  //      m_IsExecuting = false;
+  //  }
+
 
     public void DoInference(string ptext)
     {
-        TextToSpeechInferenceStepMarker.Begin();
+      
         if (input != null)
         {
             input.Dispose();
@@ -239,7 +326,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
 
         clipLength = clip.length;
         Speak();
-        TextToSpeechInferenceStepMarker.End();
+        
     }
     private void Speak()
     {
