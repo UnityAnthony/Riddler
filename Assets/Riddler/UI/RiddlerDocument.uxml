@@ -1,15 +1,15 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="Header" style="flex-grow: 1; align-items: center; justify-content: center; background-color: rgb(27, 120, 0); border-left-color: rgb(99, 6, 88); border-right-color: rgb(99, 6, 88); border-top-color: rgb(99, 6, 88); border-bottom-color: rgb(99, 6, 88); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; max-height: 33%;">
+    <ui:VisualElement name="Header" style="flex-grow: 1; align-items: center; justify-content: center; background-color: rgb(27, 120, 0); border-left-color: rgb(99, 6, 88); border-right-color: rgb(99, 6, 88); border-top-color: rgb(99, 6, 88); border-bottom-color: rgb(99, 6, 88); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px; max-height: 20%;">
         <ui:Label text="The Riddler" name="Title" style="font-size: 42px;" />
     </ui:VisualElement>
     <ui:VisualElement name="Center" style="background-color: rgb(27, 120, 0); justify-content: center; max-height: 33%; flex-grow: 1;">
         <ui:Label text="Riddle Here" name="RiddlerQuestion" style="-unity-text-align: middle-center; font-size: 36px; -unity-text-outline-color: rgb(90, 0, 135); flex-grow: 1; white-space: normal;" />
     </ui:VisualElement>
-    <ui:VisualElement name="Footer" style="background-color: rgb(99, 6, 88); max-height: 34%; flex-grow: 1;">
-        <ui:VisualElement style="flex-direction: row; justify-content: center; max-width: 70%; align-self: center; max-height: 57%; min-height: 75%;">
-            <ui:Button text="Request Riddle" name="RequestRiddleButton" />
-            <ui:Label text="AnswerHere" name="RiddleAnswer" style="font-size: 24px; white-space: normal; -unity-text-align: upper-center; min-width: 100%;" />
-            <ui:Button text="Answer Riddle" name="AnswerRiddleButton" />
+    <ui:VisualElement name="Footer" style="background-color: rgb(99, 6, 88); flex-grow: 1;">
+        <ui:VisualElement name="VisualElement" style="flex-direction: row; min-height: 50%; border-left-color: rgba(27, 120, 0, 0.96); border-right-color: rgba(27, 120, 0, 0.96); border-top-color: rgba(27, 120, 0, 0.96); border-bottom-color: rgba(27, 120, 0, 0.96); border-top-width: 5px; border-right-width: 5px; border-bottom-width: 5px; border-left-width: 5px;">
+            <ui:Button text="Answer&#10;Riddle" name="AnswerRiddleButton" style="position: absolute; right: 0%; max-height: 169%; height: 100%;" />
+            <ui:Button text="Request&#10; Riddle" name="RequestRiddleButton" style="left: 0%; position: absolute; height: 100%;" />
+            <ui:Label text="AnswerHere" name="RiddleAnswer" style="font-size: 24px; white-space: normal; -unity-text-align: upper-center; max-width: 75%; position: absolute; top: 0%; left: 20%; bottom: 0%; right: 20%;" />
         </ui:VisualElement>
         <ui:VisualElement style="flex-grow: 1; flex-direction: row; justify-content: center;">
             <ui:Button text="Prev" name="PrevButton" />
