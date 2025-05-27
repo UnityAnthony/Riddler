@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -125,7 +126,8 @@ public class RiddlerManager : Singleton<RiddlerManager>
             // Trim the audioclip to the actual recorded length
             if (position > 0)
             {
-                float[] samples = new float[position * recordedClip.channels];
+                var samples = new NativeArray<float>(position * recordedClip.channels, Allocator.Temp);
+               
                 recordedClip.GetData(samples, 0);
                 if(trimmedClip)
                     AudioClip.Destroy(trimmedClip);
@@ -138,6 +140,9 @@ public class RiddlerManager : Singleton<RiddlerManager>
                 );
                 trimmedClip.SetData(samples, 0);
                 recordedClip = trimmedClip;
+
+                samples.Dispose();
+               
             }
 
             isRecording = false;

@@ -181,25 +181,32 @@ public class SpeechToText :  Singleton<SpeechToText>
     }
     private void LoadAudio()
     {
-        numSamples = audioClip.samples;
-        var data = new float[maxSamples];
-        numSamples = maxSamples;
-        audioClip.GetData(data, 0);
-        if (audioInput != null)
+        if (audioClip)
         {
-            audioInput?.Dispose();
-            audioInput = null;
+            numSamples = audioClip.samples;
+            var data = new float[maxSamples];
+            numSamples = maxSamples;
+            audioClip.GetData(data, 0);
+            if (audioInput != null)
+            {
+                audioInput?.Dispose();
+                audioInput = null;
+            }
+            audioInput = new Tensor<float>(new TensorShape(1, numSamples), data);
         }
-        audioInput = new Tensor<float>(new TensorShape(1, numSamples), data);
     }
 
     void EncodeAudio()
     {
-        spectrogram.Schedule(audioInput);
-        var logmel = spectrogram.PeekOutput() as Tensor<float>;
-        encoder.Schedule(logmel);
-        encodedAudio = encoder.PeekOutput() as Tensor<float>;
+        if (audioClip)
+        {
+            spectrogram.Schedule(audioInput);
+            var logmel = spectrogram.PeekOutput() as Tensor<float>;
+            encoder.Schedule(logmel);
+            encodedAudio = encoder.PeekOutput() as Tensor<float>;
+        }
     }
+
     async Awaitable InferenceStep(Action<string> callback)
     {
        

@@ -361,18 +361,32 @@ public class TextToSpeech : Singleton<TextToSpeech>
         Speak();
         
     }
-    private void Speak()
+    private async void Speak()
     {
         
         if (audioSource != null)
         {
             audioSource.clip = clip;
             audioSource.Play();
+
+            await ClearResourses(clip.length) ;
         }
         else
         {
             Debug.Log("There is no audio source");
         }
+    }
+    public IEnumerator ClearAfterPlay(float time)
+    {
+        yield return new WaitForSeconds(time + 0.1f);
+        Resources.UnloadUnusedAssets();
+      //  Debug.Log("ClearAfterPlay");
+    }
+
+    public async Awaitable ClearResourses(float time)
+    { 
+        await Awaitable.WaitForSecondsAsync(time+ 0.1f);
+        await Resources.UnloadUnusedAssets();
     }
 
     private void OnDestroy()

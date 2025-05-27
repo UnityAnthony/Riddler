@@ -489,6 +489,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 082f88e7081ff574d90ed1111faaaa96, type: 2}
   currentRiddle: 0
   recordedClip: {fileID: 0}
+  trimmedClip: {fileID: 0}
   deviceName: 
   audioSource: {fileID: 947725631}
 --- !u!4 &1462727455
@@ -536,7 +537,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47095ba140c47c04c848d93e48ed4fb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpeechToText
-  audioClip: {fileID: 8300000, guid: cd878f553dc4a054bb7d898bee96c86f, type: 3}
+  audioClip: {fileID: 0}
   audioDecoder1: {fileID: 5022602860645237092, guid: 7ba6a6f1732f99947a01515050933e17, type: 3}
   audioDecoder2: {fileID: 5022602860645237092, guid: 624abb45917446244aafc68d8666884d, type: 3}
   audioEncoder: {fileID: 5022602860645237092, guid: 3e61d0582ab3055458aa9259802beba7, type: 3}
