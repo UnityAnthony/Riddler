@@ -41,9 +41,10 @@ public class TextToSpeech : Singleton<TextToSpeech>
     Worker engine;
     Model model;
     AudioClip clip;
-    Tensor input;
+
+
     private bool m_IsExecuting;
-    public float timeThreshold = 0.016f; // 16ms
+    public float timeThreshold = 0.004f; // 16ms
     void Start()
     {
         SetupInferenceEngine();
@@ -249,15 +250,9 @@ public class TextToSpeech : Singleton<TextToSpeech>
 
         m_IsExecuting = true;
 
-        if (input != null)
-        {
-            input.Dispose();
-            input = null;
-        }
-
         int[] tokens = GetTokens(ptext);
 
-        input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
+        var input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
         var m_Schedule = engine.ScheduleIterable(input);
 
 
@@ -269,6 +264,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
             if (currentTime - lastYieldTime > timeThreshold)
             {
                 yield return new WaitForEndOfFrame();
+                Debug.Log("TextToSpeech : waiting");
                 lastYieldTime = currentTime;
             }
         }
@@ -287,20 +283,21 @@ public class TextToSpeech : Singleton<TextToSpeech>
         Speak();
 
         m_IsExecuting = false;
+
+        input.Dispose();
+        output.Dispose();
+        s.Dispose();
+
     }
 
     public async Awaitable DoInferenceASync(string ptext)
     {
 
-        if (input != null)
-        {
-            input.Dispose();
-            input = null;
-        }
+
 
         int[] tokens = GetTokens(ptext);
 
-        input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
+        var input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
 
         var m_Schedule = engine.ScheduleIterable(input);
 
@@ -315,6 +312,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
             {
                 await Awaitable.EndOfFrameAsync();
                 lastYieldTime = currentTime;
+                Debug.Log("TextToSpeech : waiting");
             }
         }
 
@@ -331,20 +329,20 @@ public class TextToSpeech : Singleton<TextToSpeech>
         clipLength = clip.length;
         Speak();
 
+        input.Dispose();
+        output.Dispose();
+        s.Dispose();
+
     }
 
     public void DoInference(string ptext)
     {
       
-        if (input != null)
-        {
-            input.Dispose();
-            input = null;
-        }
+
 
         int[] tokens = GetTokens(ptext);
 
-        input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
+        var input = new Tensor<int>(new TensorShape(tokens.Length), tokens);
         engine.Schedule(input);
 
         var output = engine.PeekOutput("wav") as Tensor<float>;
@@ -359,7 +357,10 @@ public class TextToSpeech : Singleton<TextToSpeech>
 
         clipLength = clip.length;
         Speak();
-        
+        input.Dispose();
+        output.Dispose();
+        s.Dispose();
+
     }
     private async void Speak()
     {
@@ -395,16 +396,14 @@ public class TextToSpeech : Singleton<TextToSpeech>
     }
     public void Clear()
     {
-
+   
         if (engine != null)
         {
+            Debug.Log("TextToSpeech : Clear Engine");
             engine.Dispose();
             engine = null;
         }
-        if (input != null)
-        {
-            input.Dispose();
-            input = null;
-        }
+
+
     }
 }
