@@ -10,7 +10,9 @@ using System.Net;
 public class TextToSpeech : Singleton<TextToSpeech>
 {
     static readonly ProfilerMarker TextToSpeechRunMarker = new ProfilerMarker("TextToSpeech::Run");
-   // static readonly ProfilerMarker TextToSpeechInferenceStepMarker = new ProfilerMarker("TextToSpeech::InferenceStep");
+    static readonly ProfilerMarker PeekpMarker = new ProfilerMarker("TextToSpeech::Peek");
+    static readonly ProfilerMarker CloneMarker = new ProfilerMarker("TextToSpeech::Clone");
+    static readonly ProfilerMarker DownloadMarker = new ProfilerMarker("TextToSpeech::Download");
     public string inputText = "Once upon a time, there lived a girl called Alice. She lived in a house in the woods.";
     //string inputText = "The quick brown fox jumped over the lazy dog";
     //string inputText = "There are many uses of the things she uses!";
@@ -312,14 +314,20 @@ public class TextToSpeech : Singleton<TextToSpeech>
             {
                 await Awaitable.EndOfFrameAsync();
                 lastYieldTime = currentTime;
-                Debug.Log("TextToSpeech : waiting");
+                //Debug.Log("TextToSpeech : waiting");
             }
         }
-
+        PeekpMarker.Begin();
         var output = engine.PeekOutput("wav") as Tensor<float>;
-        var s = output.ReadbackAndClone();
+        PeekpMarker.End();
+        //CloneMarker.Begin();
+       // var s = output.ReadbackAndClone();
+        var awaitableTensor = await output.ReadbackAndCloneAsync();
+        var s = awaitableTensor;
+       // CloneMarker.End();
+        DownloadMarker.Begin();
         var samples = s.DownloadToArray();
-
+        DownloadMarker.End();
         //  Debug.Log($"Audio size = {samples.Length / samplerate} seconds");
         if (clip)
             Destroy(clip);
@@ -331,7 +339,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
 
         input.Dispose();
         output.Dispose();
-        s.Dispose();
+       // s.Dispose();
 
     }
 
@@ -399,7 +407,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
    
         if (engine != null)
         {
-            Debug.Log("TextToSpeech : Clear Engine");
+
             engine.Dispose();
             engine = null;
         }
