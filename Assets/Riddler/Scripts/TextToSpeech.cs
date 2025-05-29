@@ -337,9 +337,10 @@ public class TextToSpeech : Singleton<TextToSpeech>
         clipLength = clip.length;
         Speak();
 
+        awaitableTensor.Dispose();
         input.Dispose();
         output.Dispose();
-       // s.Dispose();
+
 
     }
 
