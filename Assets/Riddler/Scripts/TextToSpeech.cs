@@ -67,7 +67,7 @@ public class TextToSpeech : Singleton<TextToSpeech>
             model = ModelLoader.Load(modelAsset);
 
         if ( engine == null )
-            engine = new Worker(model,BackendType.GPUCompute);
+            engine = new Worker(model,BackendType.CPU);
  
     }
     public void SetText(string s)
